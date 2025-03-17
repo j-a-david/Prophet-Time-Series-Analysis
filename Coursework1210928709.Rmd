@@ -1,0 +1,98 @@
+---
+title: "MTH6139 Time Series" 
+subtitle: "Coursework 1" 
+author: "James David" 
+date: "Semester 2 2025" 
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: spacelab
+    highlight: tango
+---
+ 
+```{r, echo=FALSE}
+# This code will display the QMUL logo at the top right of the page
+# Do not change this code
+htmltools::img(src = knitr::image_uri("images/QMlogo.png"),
+               alt = 'logo',
+               style = 'position:absolute; top:0; right:0; padding:10px; width:20%;')
+```
+
+# Section 1: The Data
+I have chosen to use a data set regarding the monthly deaths from lung diseases in the UK. As an aspiring Actuary I thought it would be quite interesting to use prophet to analyse this time series and see how well it was able to model mortality based on this set of training data.
+
+## 1.1 Summary
+
+```{r}
+# ldeaths is a time series related to the monthly deaths from lung diseases in the UK
+# It is found within the R datasets library has various data sets spanning numerous subjects.
+library(datasets)
+ldeaths.df = data.frame(
+    ds=zoo::as.yearmon(time(ldeaths)),
+    y=ldeaths)
+# This code stores the data within a data frame assigning the variables ds and y to the date and number 
+# of deaths respectively. This will be useful when we carry out our analysis with Prophet later on. 
+# Below are some sample points from the data set as well as the frequency of data collection.
+head(ldeaths.df,1)
+tail(ldeaths.df,1)
+frequency(ldeaths)
+```
+
+# Section 2: Time Series Analysis
+In this section, I will begin to explore the data set in more detail using some tools from R as well as Meta's Prophet module.
+
+## 2.1 Initial Plot
+I will begin with a basic plot of the data. This is done to get a general understanding of the data and see if we can identify any trends that we may like to explore.
+```{r}
+plot(ldeaths)
+```
+
+From this plot we can see a trend in the data, peaks start to form in the latter half of the year and troughs form at the beginning of the year. This is interesting as it suggests some seasonality can be found. Considering the data set we are using this would be a logical conclusion as we may assume that lung disease related deaths will increase during Winter periods and decline during the Summer!
+
+## 2.2 Decomposition
+To investigate the plot we made in the previous section we can perform a simple decomposition of the data. This will break the data down into 4 parts: the observed data, a trend component which is the **long-term**, a seasonal component which considers the **time of year**, and a component that measures random variation which are factors that are **unpredicted**.
+```{r}
+compositionldeaths = decompose(ldeaths)
+plot(compositionldeaths)
+```
+
+One thing to mention before going further is that these elements are all closely tied together. The **observed graph = trend + seasonal + random** factors altogether! 
+
+From this decomposition we can now observe some interesting things more clearly. First of all we can see that our trend is largely negative. This suggests that we are seeing a declining rate in deaths from lung disease.
+
+Moving on to the seasonal component we can confirm our assumption made in the previous section that our data is very sensitive to seasonal factors with a graph that fluctuates seemingly consistently across all years of our data.
+
+Finally the random component. Here we can see that on the whole there is some minor fluctuation cause by unpredicted factors. However, this is not the case in 1976 and 1977 where we see both a large spike and dip respectively. This suggests that there was some external factor contributing to lung disease mortality. Something that may have to be researched further.
+
+Overall, this decomposition gives us a good understanding of the data set before moving onto a more predictive analysis of the data using prophet.
+
+## 2.3 Analysis with Prophet
+```{r, message=FALSE,warning=FALSE}
+ldeaths.df = data.frame(
+    ds=zoo::as.yearmon(time(ldeaths)),
+    y=ldeaths) # this saves our data into a data frame converting the date into the correct format 
+# for prophet's analysis.
+model = prophet::prophet(ldeaths.df) # creates the model for our forecasting
+future = prophet::make_future_dataframe(model, periods=72, freq="month") # forms a data frame with our 
+# initial time periods + 72 periods (6yrs) 
+forecast = predict(model, future) # this is an R function which will use our model to predict results 
+# for the future data frame.
+plot(model,forecast) # visualises our plot
+```
+
+In this plot the **black dots** are data point from the original data set, the **darker blue** line is the time series formed by our model and the **light blue shading** is our uncertainty interval. 
+
+# Section 3: Conclusion
+
+Considering our analysis we can conclude that our model is quite a good fit for the data set with the majority of points falling within the uncertainty interval. However, the model seems overly optimistic when predicting the minimum points which could be a result of the negative trend line we saw in the decomposition. 
+
+This is something I would like to investigate further maybe using a larger and more up-to-date data set. Then comparing the two models to see what (if any) their differences are.
+
+Overall, I have found prophet a very interesting and intuitive module to work with and I will be using it again in the future!
+
+
+# References
+- Decomposition in R: <https://rpubs.com/davoodastaraky/TSA1>
+- Time Series Analysis with Prophet: <https://medium.com/data-science/getting-started-predicting-time-series-data-with-facebook-prophet-c74ad3040525>
+- Prophet: <https://facebook.github.io/prophet/>

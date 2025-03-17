@@ -1,0 +1,23 @@
+Version: 1.0
+ProjectId: 40c886cc-4b5a-4968-877a-20e1135b8a6e
+
+RestoreWorkspace: No
+SaveWorkspace: No
+AlwaysSaveHistory: No
+
+EnableCodeIndexing: Yes
+UseSpacesForTab: Yes
+NumSpacesForTab: 4
+Encoding: UTF-8
+
+RnwWeave: Sweave
+LaTeX: pdfLaTeX
+
+StripTrailingWhitespace: Yes
+LineEndingConversion: Posix
+
+UseNativePipeOperator: Yes
+
+SpellingDictionary: en_GB
+
+ProjectName: Coursework1210928709
